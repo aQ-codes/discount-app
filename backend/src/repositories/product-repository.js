@@ -13,14 +13,19 @@ class ProductRepository {
     return await Product.find(); 
   }
 
-  // Get product by ID
+  // Get product by custom ID
   async getProduct(id) {
-    return await Product.findById(id); 
+    return await Product.findOne({ id }); 
+  }
+  
+
+  // Get products by an array of custom IDs
+  async getProductsByIds(ids) {
+    return await Product.find({ id: { $in: ids } }); 
   }
 
-  // Get products by an array of IDs
-  async getProductsByIds(ids) {
-    return await Product.find({ id: { $in: ids } });
+  async findProductById(productId) {
+    return await Product.findOne({ id: productId }); 
   }
 }
 

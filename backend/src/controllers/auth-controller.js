@@ -8,6 +8,7 @@ const customerLogin = async (req, res) => {
 
   try {
     const customer = await customerRepository.findCustomerByEmail(email);
+    
     if (!customer) {
       return res.status(401).json({ message: "Invalid credentials" });
     }

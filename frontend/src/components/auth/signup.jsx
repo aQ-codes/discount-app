@@ -22,7 +22,7 @@ const Signup = () => {
         password,
       });
 
-      if (response.status === 201) {
+      if (response.status === 200) {
         router.push('/login');
       }
     } catch (err) {
@@ -78,7 +78,7 @@ const Signup = () => {
               {isLoading ? 'Signing Up...' : 'Sign Up'}
             </button>
             <p className="sign-in-text">
-              Already have an account? <a href="/signin" className="sign-in-link">Sign In</a>
+              Already have an account? <a href="/login" className="sign-in-link">Sign In</a>
             </p>
           </div>
         </form>

@@ -2,7 +2,7 @@ import express from "express";
 import cors from 'cors';
 import { connect } from "./config/db-config.js";
 import initializeRoutes from './routes/index.js'; 
-import seedProducts from "./products/seed-products.js";
+// import seedProducts from "./seeders/seed-products.js";
 
 const app = express();
 const PORT = 8080;
@@ -15,7 +15,7 @@ app.use(express.json()); //for parsing
 // Connect to MongoDB
 connect();
 
-seedProducts()
+// seedProducts()
 
 // Initialize all routes
 initializeRoutes(app);

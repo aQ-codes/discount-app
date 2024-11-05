@@ -10,7 +10,7 @@ const Footer = () => {
                 <p>
                     We have perfumes that suits your <br />style and which you’re proud.
                 </p>
-                <div class="social-icons">
+                <div className="social-icons">
                     <a href="#"><Image src="/assets/icons/twitter.png" alt="" height={30} width={30}/></a>
                     <a href="#"><Image src="/assets/icons/fb2.png" alt="" height={30} width={30}/></a>
                     <a href="#"><Image src="/assets/icons/insta.png" alt="" height={30} width={30}/></a>

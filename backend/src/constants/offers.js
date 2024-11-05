@@ -6,7 +6,7 @@ export const OFFERS = {
     product: 'PF1'  // Cool Water
   },
   
-  // Bulk Discount: Discounted price if quantity threshold is met
+  // Bulk Discount
   BULK: { 
     type: 'BULK', 
     product: 'PF2', // Lataffa Bulk Discount 
@@ -14,14 +14,14 @@ export const OFFERS = {
     discountedPrice: 75 
   },
   
-  // Combo Discount: Discount for buying specific product pairs together
+  // Combo Discount
   COMBO: { 
     type: 'COMBO', 
     products: ['PF1', 'PF3'], // Cool Water + CK Combo 
     discount: 10  
   },
   
-  // Limited Time Discount: Only active during a specific date range
+  // Limited Time Discount
   LIMITED_TIME: { 
     type: 'LIMITED_TIME', 
     product: 'PF4', // Armani Code 
@@ -30,30 +30,28 @@ export const OFFERS = {
   },
   
   
-  // Seasonal Discount: Holiday season or specific seasonal promotion
+  // Seasonal Discount
   SEASONAL: { 
     type: 'SEASONAL', 
-    products: ['PF2', 'PF5'],  // Lataffa and Gucci Bloom Seasonal Discount
+    products: ['PF4', 'PF5'],  
     discountPercent: 25,  // 25% discount 
-    season: 'Winter' 
   },
   
-  // Loyalty Discount: Extra discount for loyal customers
+  // Loyalty Discount
   LOYALTY: { 
     type: 'LOYALTY', 
-    minPurchases: 5, // Applies if customer made 5+ previous purchases
+    minPurchases: 5, // Applies if customer made 5+ purchases
     discountPercent: 10  // 10% discount on total cart
   },
   
-  // Cart-Wide Discount: Discount if cart total exceeds a specific amount
+  // Cart-Wide Discount
   CART_TOTAL: { 
     type: 'CART_TOTAL', 
     minCartTotal: 500,  // $500 minimum cart total 
     discountPercent: 5 // 5% discount on the entire cart
   },
-  
 
-  // Anniversary Discount: Store-wide discount on the anniversary date
+  // Anniversary Discount
   ANNIVERSARY: { 
     type: 'ANNIVERSARY', 
     discountPercent: 10, 

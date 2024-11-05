@@ -23,12 +23,12 @@ const Navbar = () => {
     <div className="icons">
         <div className="icon wishlist">
             <span><Image src="/assets/icons/Vector.png" alt="" height={30} width={30}/></span>
-            <span class="badge">2</span>
+            <span className="badge">2</span>
         </div>
-        <a href="/assets//cart/cart.html">
+        <a href="/cart">
             <div className="icon cart">
                 <span><Image src="/assets/icons/Cart1.png" alt=""  height={30} width={30}/></span>
-                <span class="badge">4</span>
+                <span className="badge">4</span>
             </div>
         </a>
         <div className="icon profile">

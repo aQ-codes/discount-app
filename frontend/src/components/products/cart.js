@@ -1,162 +1,214 @@
-"use client"
-import React, { useState } from 'react';
-import Image from 'next/image';
+"use client";
+import React, { useState, useEffect, useCallback } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { axiosInstance } from "@/config/axios-config";
 
 const Cart = () => {
-  const [quantities, setQuantities] = useState([1, 1, 1, 2]);
+  const [cartItems, setCartItems] = useState([]);
+  const [discountMessages, setDiscountMessages] = useState([]);
   const [offerPopup, setOfferPopup] = useState({ product: null });
   const [offersModalVisible, setOffersModalVisible] = useState(false);
+  const [total, setTotal] = useState(0);
+  const [originalTotal, setOriginalTotal] = useState(0);
+  const [productDetails, setProductDetails] = useState({});
 
-  const handleQuantityChange = (index, delta) => {
-    setQuantities((prev) =>
-      prev.map((qty, i) => (i === index ? Math.max(1, qty + delta) : qty))
-    );
+
+  useEffect(() => {
+    // Retrieve cart items from localStorage on component mount
+    if (localStorage.getItem('cartItems')){
+      const storedCartItems = JSON.parse(localStorage.getItem('cartItems')) || {};
+      const itemsArray = Object.entries(storedCartItems).map(([id, data]) => ({
+        productId: id,
+        ...data,
+      }));
+      setCartItems(itemsArray);
+
+      console.log("executed")
+
+
+      // cartItems.forEach(async item => {
+      //   try {
+      //     const { data } = await axiosInstance.get(`/customer/product/${item.productId}`);
+      //     console.log("executed")
+
+      //     setProductDetails(prevDetails => ({
+      //       ...prevDetails,
+      //       [item.productId]: data
+      //     }));
+
+      //   } catch (error) {
+      //     console.error(`Error fetching details for product ${item.productId}`, error);
+      //   }
+      // });
+
+      
+    }
+
+  }, []);
+
+
+
+
+
+  useEffect(() => {
+    // Fetch discounted total whenever cartItems change
+    if (cartItems.length > 0) {
+      fetchDiscountedTotal(cartItems);
+    }
+  }, [cartItems]);
+
+  const fetchDiscountedTotal = async (updatedCart) => {
+    const cartArray = updatedCart.map(item => ({
+      productId: item.productId,
+      quantity: item.quantity,
+    }));
+
+    try {
+      const response = await axiosInstance.post('/customer/totalprice', { cartItems: cartArray });
+      setTotal(response.data.total);
+      setDiscountMessages(response.data.discountsApplied)
+      setOriginalTotal(response.data.subtotal);
+    } catch (error) {
+      console.log("Error fetching total:", error);
+    }
   };
 
-  const toggleOfferPopup = (productIndex) => {
-    setOfferPopup((prev) => ({ product: prev.product === productIndex ? null : productIndex }));
+  const handleQuantityChange = useCallback((productId, delta) => {
+    setCartItems((prevItems) =>
+      prevItems.map((item) =>
+        item.productId === productId
+          ? { ...item, quantity: Math.max(1, item.quantity + delta) }
+          : item
+      )
+    );
+
+    const updatedCartItems = JSON.parse(localStorage.getItem("cartItems"));
+    updatedCartItems[productId].quantity = Math.max(
+      1,
+      updatedCartItems[productId].quantity + delta
+    );
+    localStorage.setItem("cartItems", JSON.stringify(updatedCartItems));
+  }, []);
+
+  const toggleOfferPopup = (productId) => {
+    setOfferPopup((prev) => ({
+      product: prev.product === productId ? null : productId,
+    }));
   };
 
   const openOffersModal = () => {
-    setOffersModalVisible(true);
-  };
+  setOffersModalVisible(true)
+  }
+  
+  const closeOffersModal = () => setOffersModalVisible(false);
 
-  const closeOffersModal = () => {
-    setOffersModalVisible(false);
-  };
+  // console.log(productDetails)
+
 
   return (
     <div>
       {/* Breadcrumb */}
       <section className="breadcrumb-section">
         <div className="breadcrumb">
-          <a href="/">Home</a> &gt; <a href="/cart">Cart</a>
+          <Link href="/">Home</Link> &gt; 
+          <a href="/cart">Cart</a>
         </div>
       </section>
 
       <div className="product-count">
-        <h2>04 Items</h2>
+        <h2>{cartItems.length} Items</h2>
       </div>
+
+
 
       <div className="cart-container">
         {/* Product List */}
         <div className="product-list">
-          {/* Product Item 1 */}
-          <div className="product-container">
-            <div className="product-item">
-              <Image src="/assets/icons/image1.png" alt="Davidoff" width={100} height={100} />
-              <div className="product-details">
-                <h3>DAVIDOFF</h3>
-                <p>Cool Water Eau De Toilette for Men</p>
-                <p className="price">$360</p>
-                <div className="pop">
-                  <p className="offer" onClick={() => toggleOfferPopup(0)}>
-                    1 Offers Available
-                    <span className="offer-image">
-                      <Image src="/assets/icons/iemo.png" alt="Offer" width={20} height={20} />
-                    </span>
-                  </p>
-                  {offerPopup.product === 0 && (
-                    <div className="offer-popup">
-                      <p><strong>Offers Applied</strong></p>
-                      <p>Buy 1 Get 1 Free</p>
-                      <button onClick={() => toggleOfferPopup(null)}>Close</button>
-                    </div>
-                  )}
+          {cartItems.map((item) => (
+            <div className="product-container" key={item.productId}>
+              <div className="product-item">
+                <Image src="/assets/images/image1.png" alt="common_image" width={100} height={100} />
+                <div className="product-details">
+                  <h3>{item.brand}</h3>
+                  <p>{item.name}</p>
+                  <p className="price">${item.price}</p>
+                  <div className="pop">
+                    {offerPopup.product === item.productId && (
+                      <div className="offer-popup">
+                        <p><strong>Offers Applied</strong></p>
+                        <p>Buy 1 Get 1 Free</p>
+                        <button onClick={() => toggleOfferPopup(null)}>Close</button>
+                      </div>
+                    )}
+                  </div>
+                  <div className="quantity-controls">
+                    <button onClick={() => handleQuantityChange(item.productId, -1)}>-</button>
+                    <span className="quantity">Qty: {item.quantity}</span>
+                    <button onClick={() => handleQuantityChange(item.productId, 1)}>+</button>
+                  </div>
                 </div>
-                <div className="quantity-controls">
-                  <button onClick={() => handleQuantityChange(0, -1)}>-</button>
-                  <span className="quantity">Qty: {quantities[0]}</span>
-                  <button onClick={() => handleQuantityChange(0, 1)}>+</button>
+                <div className="product-actions">
+                  <Image src="/assets/icons/delete.png" alt="Delete" width={20} height={20} />
                 </div>
-              </div>
-              <div className="product-actions">
-                <Image src="/assets/icons/delete.png" alt="Delete" width={20} height={20} />
               </div>
             </div>
-          </div>
-          {/* Repeat similar structure for other products */}
-
-          {/* Product Item 2 */}
-          <div className="product-container">
-            <div className="product-item">
-              <Image src="/assets/icons/image2.png" alt="Armani" width={100} height={100} />
-              <div className="product-details">
-                <h3>ARMANI</h3>
-                <p>Acqua di Gio Profumo for Men</p>
-                <p className="price">$400</p>
-                <div className="pop">
-                  <p className="offer" onClick={() => toggleOfferPopup(1)}>
-                    1 Offers Available
-                    <span className="offer-image">
-                      <Image src="/assets/icons/iemo.png" alt="Offer" width={20} height={20} />
-                    </span>
-                  </p>
-                  {offerPopup.product === 1 && (
-                    <div className="offer-popup">
-                      <p><strong>Offers Applied</strong></p>
-                      <p>Buy 2 Get 1 Free</p>
-                      <button onClick={() => toggleOfferPopup(null)}>Close</button>
-                    </div>
-                  )}
-                </div>
-                <div className="quantity-controls">
-                  <button onClick={() => handleQuantityChange(1, -1)}>-</button>
-                  <span className="quantity">Qty: {quantities[1]}</span>
-                  <button onClick={() => handleQuantityChange(1, 1)}>+</button>
-                </div>
-              </div>
-              <div className="product-actions">
-                <Image src="/assets/icons/delete.png" alt="Delete" width={20} height={20} />
-              </div>
-            </div>
-          </div>
-          {/* Repeat structure for other products */}
+          ))}
         </div>
+
+
 
         {/* Order Summary */}
         <div className="order-summary">
           <h3>Order Details</h3>
           <div className="summary-item">
             <span>Bag total</span>
-            <span>$1390</span>
+            <span>${originalTotal}</span>
           </div>
           <div className="summary-item">
             <span>Discount</span>
-            <span className="discount">- $450</span>
+            <span className="discount">- ${originalTotal - total}</span>
           </div>
           <div className="pop">
             <p className="offers-applied" onClick={openOffersModal}>
-              3 offers Applied <span className="info-icon">i</span>
+            {discountMessages.length} offers Applied <span className="info-icon"></span>
             </p>
           </div>
           <div className="summary-item total">
             <span>Total</span>
-            <span>$940</span>
+            <span>${total}</span>
           </div>
           <p className="congrats-message">
-            Congratulations! You've Saved $450 today!
+            Congratulations! You’ve Saved {originalTotal - total} today!
           </p>
           <button className="checkout-btn">Go to Checkout</button>
         </div>
       </div>
 
+
+
+
+
+
       {/* Modal Popup for Offers */}
       {offersModalVisible && (
         <div className="modal">
           <div className="modal-content">
-            <span className="close" onClick={closeOffersModal}>&times;</span>
-            <h4>5 Offers Applied</h4>
+            <span className="close" onClick={closeOffersModal}>
+            <Image 
+              src="/assets/images/img/cross.svg" 
+              alt="Close Icon" 
+              width={20} 
+              height={20} 
+              />
+            </span>
+            <h4>{discountMessages.length} Offers Applied</h4>
             <ul>
-              <li><strong>Buy 1 Get 1 Free</strong></li>
-              <li>Buy 3 or More & Pay Just <strong>$75 Each!</strong></li>
-              <li>Special Combo: Buy Cool Water + Calvin Klein & Get <strong>$10 Off</strong> on Calvin Klein</li>
-              <li>Limited Time Only: <strong>15% Off</strong> When You Buy in the Next 2 Days</li>
-              <li>Gucci Deal: Buy 2 units for <strong>10% off</strong>, or 4+ units for <strong>20% off</strong>.</li>
+                {discountMessages.map((item) => (<li  key={item.length}>{item}</li>))}
             </ul>
             <div className="total-discount">
               <span>Total Discount</span>
-              <span className="discount-amount">- $345</span>
+              <span className="discount-amount">{originalTotal - total}</span>
             </div>
           </div>
         </div>

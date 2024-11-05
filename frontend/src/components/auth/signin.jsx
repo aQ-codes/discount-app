@@ -1,11 +1,12 @@
 "use client"
+import { axiosInstance } from '@/config/axios-config';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react'
-import axios from 'axios';
+
 
 const Signin = () => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const router = useRouter();
@@ -13,14 +14,14 @@ const Signin = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('/api/auth/signin', {
-        username,
+      const response = await axiosInstance.post('/customer/login', {
+        email,
         password,
       });
 
       if (response.status === 200) {
         // Redirect on successful login
-        router.push('/dashboard');
+        router.push('/');
       }
     } catch (err) {
       setError('Login failed');
@@ -45,8 +46,8 @@ const Signin = () => {
               type="text" 
               placeholder="Enter your email or phone" 
               className="input-field" 
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
             <p className="in-name">Password</p>
             <div className="password-field">
@@ -67,7 +68,7 @@ const Signin = () => {
             </div>
             {error && <p className="error-message">{error}</p>}
             <button type="submit" className="sign-up-button">Sign In</button>
-            <p className="sign-in-text">Don't have an account? <a href="/signup" className="sign-in-link">Sign Up</a></p>
+            <p className="sign-in-text">Dont have an account? <a href="/register" className="sign-in-link">Sign Up</a></p>
           </div>
         </form>
       </div>
