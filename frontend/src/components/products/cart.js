@@ -11,48 +11,44 @@ const Cart = () => {
   const [offersModalVisible, setOffersModalVisible] = useState(false);
   const [total, setTotal] = useState(0);
   const [originalTotal, setOriginalTotal] = useState(0);
-  const [productDetails, setProductDetails] = useState({});
+  const [productDetails, setProductDetails] = useState([]);
 
+  let discount = (originalTotal - total).toFixed(2);
 
   useEffect(() => {
-    // Retrieve cart items from localStorage on component mount
-    if (localStorage.getItem('cartItems')){
-      const storedCartItems = JSON.parse(localStorage.getItem('cartItems')) || {};
+    if (localStorage.getItem("cartItems")) {
+      const storedCartItems = JSON.parse(localStorage.getItem("cartItems")) || {};
       const itemsArray = Object.entries(storedCartItems).map(([id, data]) => ({
         productId: id,
         ...data,
       }));
       setCartItems(itemsArray);
-
-      console.log("executed")
-
-
-      // cartItems.forEach(async item => {
-      //   try {
-      //     const { data } = await axiosInstance.get(`/customer/product/${item.productId}`);
-      //     console.log("executed")
-
-      //     setProductDetails(prevDetails => ({
-      //       ...prevDetails,
-      //       [item.productId]: data
-      //     }));
-
-      //   } catch (error) {
-      //     console.error(`Error fetching details for product ${item.productId}`, error);
-      //   }
-      // });
-
-      
     }
-
   }, []);
 
+  useEffect(() => {
+    const fetchProductDetails = async () => {
+      const detailsArray = await Promise.all(
+        cartItems.map(async (item) => {
+          try {
+            const response = await axiosInstance.get(`/customer/product/${item.productId}`);
+            return response.data;
+          } catch (error) {
+            console.error(`Error fetching details for product ${item.productId}`, error);
+            return null;
+          }
+        })
+      );
 
+      setProductDetails(detailsArray);
+    };
 
-
+    if (cartItems.length) {
+      fetchProductDetails();
+    }
+  }, [cartItems]);
 
   useEffect(() => {
-    // Fetch discounted total whenever cartItems change
     if (cartItems.length > 0) {
       fetchDiscountedTotal(cartItems);
     }
@@ -65,9 +61,9 @@ const Cart = () => {
     }));
 
     try {
-      const response = await axiosInstance.post('/customer/totalprice', { cartItems: cartArray });
-      setTotal(response.data.total);
-      setDiscountMessages(response.data.discountsApplied)
+      const response = await axiosInstance.post("/customer/totalprice", { cartItems: cartArray });
+      setTotal(response.data.discountedtotal);
+      setDiscountMessages(response.data.discountsApplied);
       setOriginalTotal(response.data.subtotal);
     } catch (error) {
       console.log("Error fetching total:", error);
@@ -91,27 +87,35 @@ const Cart = () => {
     localStorage.setItem("cartItems", JSON.stringify(updatedCartItems));
   }, []);
 
+  // Function to remove item from cart
+  const removeFromCart = (productId) => {
+
+    const updatedCartItems = cartItems.filter(item => item.productId !== productId);
+    setCartItems(updatedCartItems);
+
+    // Update localStorage
+    const storedCartItems = JSON.parse(localStorage.getItem("cartItems"));
+    delete storedCartItems[productId];
+    localStorage.setItem("cartItems", JSON.stringify(storedCartItems));
+
+    alert("Item removed from cart!");
+  };
+
   const toggleOfferPopup = (productId) => {
     setOfferPopup((prev) => ({
       product: prev.product === productId ? null : productId,
     }));
   };
 
-  const openOffersModal = () => {
-  setOffersModalVisible(true)
-  }
-  
+  const openOffersModal = () => setOffersModalVisible(true);
   const closeOffersModal = () => setOffersModalVisible(false);
-
-  // console.log(productDetails)
-
 
   return (
     <div>
       {/* Breadcrumb */}
       <section className="breadcrumb-section">
         <div className="breadcrumb">
-          <Link href="/">Home</Link> &gt; 
+          <Link href="/">Home</Link> &gt;
           <a href="/cart">Cart</a>
         </div>
       </section>
@@ -120,15 +124,13 @@ const Cart = () => {
         <h2>{cartItems.length} Items</h2>
       </div>
 
-
-
       <div className="cart-container">
         {/* Product List */}
         <div className="product-list">
           {cartItems.map((item) => (
             <div className="product-container" key={item.productId}>
               <div className="product-item">
-                <Image src="/assets/images/image1.png" alt="common_image" width={100} height={100} />
+                <Image src={item.pic} alt="common_image" width={100} height={100} />
                 <div className="product-details">
                   <h3>{item.brand}</h3>
                   <p>{item.name}</p>
@@ -143,20 +145,25 @@ const Cart = () => {
                     )}
                   </div>
                   <div className="quantity-controls">
-                    <button onClick={() => handleQuantityChange(item.productId, -1)}>-</button>
+                    <button className="qty-btn" onClick={() => handleQuantityChange(item.productId, -1)}>-</button>
                     <span className="quantity">Qty: {item.quantity}</span>
-                    <button onClick={() => handleQuantityChange(item.productId, 1)}>+</button>
+                    <button className="qty-btn" onClick={() => handleQuantityChange(item.productId, 1)}>+</button>
                   </div>
                 </div>
                 <div className="product-actions">
-                  <Image src="/assets/icons/delete.png" alt="Delete" width={20} height={20} />
+                  <Image 
+                    src="/assets/icons/delete.png" 
+                    alt="Delete" 
+                    width={40} 
+                    height={40} 
+                    className="img"
+                    onClick={() => removeFromCart(item.productId)}
+                  />
                 </div>
               </div>
             </div>
           ))}
         </div>
-
-
 
         {/* Order Summary */}
         <div className="order-summary">
@@ -167,11 +174,11 @@ const Cart = () => {
           </div>
           <div className="summary-item">
             <span>Discount</span>
-            <span className="discount">- ${originalTotal - total}</span>
+            <span className="discount">- ${discount}</span>
           </div>
           <div className="pop">
             <p className="offers-applied" onClick={openOffersModal}>
-            {discountMessages.length} offers Applied <span className="info-icon"></span>
+              {discountMessages.length} offers Applied <span className="info-icon"></span>
             </p>
           </div>
           <div className="summary-item total">
@@ -179,36 +186,33 @@ const Cart = () => {
             <span>${total}</span>
           </div>
           <p className="congrats-message">
-            Congratulations! You’ve Saved {originalTotal - total} today!
+            Congratulations! You’ve Saved {discount} today!
           </p>
           <button className="checkout-btn">Go to Checkout</button>
         </div>
       </div>
-
-
-
-
-
 
       {/* Modal Popup for Offers */}
       {offersModalVisible && (
         <div className="modal">
           <div className="modal-content">
             <span className="close" onClick={closeOffersModal}>
-            <Image 
-              src="/assets/images/img/cross.svg" 
-              alt="Close Icon" 
-              width={20} 
-              height={20} 
+              <Image 
+                src="/assets/images/img/cross.svg" 
+                alt="Close Icon" 
+                width={40} 
+                height={40} 
               />
             </span>
             <h4>{discountMessages.length} Offers Applied</h4>
             <ul>
-                {discountMessages.map((item) => (<li  key={item.length}>{item}</li>))}
+              {discountMessages.map((item) => (
+                <li key={item.length}>{item}</li>
+              ))}
             </ul>
             <div className="total-discount">
               <span>Total Discount</span>
-              <span className="discount-amount">{originalTotal - total}</span>
+              <span className="discount-amount">{discount}</span>
             </div>
           </div>
         </div>

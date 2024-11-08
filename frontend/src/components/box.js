@@ -13,7 +13,7 @@ const Box = () => {
         <div className="col-4"></div>
           <div className="col-4 sign-text">
             Sign up and get 20% off on your first order.
-            <a href="">Sign Up Now</a>
+            <a href="/register">Sign Up Now</a>
           </div>
           <div className="col-4">
             <Image 

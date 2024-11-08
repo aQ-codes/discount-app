@@ -99,18 +99,6 @@ body {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 /* home  */
 
 .box {
@@ -822,11 +810,12 @@ span.offer-image {
 .product-actions {
   position: relative;
 }
-.product-actions img {
+.product-actions .img {
+  cursor: pointer;
   display: flex;
   gap: 20px;
-  width: 20px;
-  height: 20px;
+  width: 30px;
+  height: 30px;
   position: absolute;
   left: 300px;
   top: -74px;
@@ -851,12 +840,15 @@ span.offer-image {
   align-items: center;
   gap: 20px;
 }
+
+.qua
 wishlist-icon {
   width: 20px;
   height: 20px;
   display: flex;
   gap: 20px;
 }
+
 .quantity {
   border: 1px solid #000;
   border-radius: 15px;
@@ -1073,18 +1065,25 @@ S .social-icons a {
   position: relative;
 }
 
+
+
 /* Modal styles */
 .modal {
   display: block;
   position: absolute;
   padding:20px;
-  top: 10%;
-  left: 40%;
+  top: 0%;
+  left: 0%;
   z-index: 1000;
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
+  display:flex;
+  justify-content: center;
+  justify-items: center;
+
 }
+
 
 .modal-content {
   /* position: relative; */
@@ -1095,7 +1094,7 @@ S .social-icons a {
   padding: 20px;
   border-radius: 8px;
   width: 457px;
-  height: 380px;
+  height: auto;
   max-width: 400px;
   box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 }

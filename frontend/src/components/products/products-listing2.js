@@ -2,7 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { axiosInstance } from '@/config/axios-config';
-// but the backend is expecting   const { cartItems } = req.body; // Array of { productId, quantity }
+
+
+
 const ProductListing = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -23,22 +25,29 @@ const ProductListing = () => {
   }, []);
 
   // Function to add product to cart
-    const addToCart = (productId) => {
+  const addToCart = (productId) => {
     // Retrieve existing cart from localStorage, or initialize as empty object
     const cartItems = JSON.parse(localStorage.getItem('cartItems')) || {};
 
-    // Update quantity if item exists, or add new item with quantity 1
+    // Find the product to retrieve its details
+    const product = products.find(p => p.id === productId);
+
+    // Update cart item with additional product details
     if (cartItems[productId]) {
       cartItems[productId].quantity += 1;
     } else {
-      cartItems[productId] = { quantity: 1 };
+      cartItems[productId] = {
+        quantity: 1,
+        name: product.name,
+        pic: product.pic,
+        price: product.price,
+      };
     }
 
     // Save updated cart back to localStorage
     localStorage.setItem('cartItems', JSON.stringify(cartItems));
 
-    // Optional: Display confirmation or feedback to the user
-    alert(`${products.find(p => p.id === productId).name} added to cart!`);
+    alert(`${product.name} added to cart!`);
   };
 
   return (
@@ -103,3 +112,5 @@ const ProductListing = () => {
 };
 
 export default ProductListing;
+
+

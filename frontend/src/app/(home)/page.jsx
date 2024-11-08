@@ -1,7 +1,7 @@
 import Box from '../../components/box'
 import Footer from '../../components/footer'
 import Navbar from '../../components/navbar'
-import ProductsListing from '../../components/products/products-listing'
+import ProductsListing from '../../components/products/products-listing2'
 import React from 'react'
 
 const page = () => {

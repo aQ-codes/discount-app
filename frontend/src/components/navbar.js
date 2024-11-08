@@ -35,7 +35,7 @@ const Navbar = () => {
             <span><Image src="/assets/icons/person.png" alt=""  height={30} width={30}/></span>
         </div>
     </div>
-</nav>
+    </nav>
   )
 }
 

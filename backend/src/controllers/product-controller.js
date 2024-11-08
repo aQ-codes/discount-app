@@ -16,9 +16,9 @@ export const getAllProductsController = async (req, res, next) => {
 
 //controller to get a particular product detail
 export const getProductDetails = async (req, res) => {
-  const { id } = req.params;
+  const {productId} = req.params;
   try {
-    const product = await ProductRepository.getProduct(id);
+    const product = await ProductRepository.getProduct(productId);
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });
     }
@@ -54,11 +54,15 @@ export const calculateCartTotalController = async (req, res, next) => {
     console.log(products)
     
     // Apply discounts
-    const {subtotal, total, discountsApplied } = applyDiscounts(cartItems, products);
+    const {subtotal, discountedtotal, discountsApplied } = applyDiscounts(cartItems, products);
 
-    console.log(total,subtotal)
+    discountedtotal
 
-    return res.status(200).json({ total, discountsApplied , subtotal});
+    // console.log("discounted ",discountedtotal)
+
+    console.log( discountedtotal,subtotal)
+
+    return res.status(200).json({ discountedtotal, discountsApplied , subtotal});
   } catch (err) {
     next(err);
   }
